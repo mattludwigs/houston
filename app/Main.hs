@@ -2,16 +2,24 @@
 {-# LANGUAGE DeriveGeneric #-}
 module Main where
 
-import Data.Fund (Fund(..))
+import Fund (loadEnv)
+import Data.Fund (Fund (..))
+import Data.Environment (databaseConnectionString)
 import Web.Scotty
 import Network.Wai.Middleware.RequestLogger
 import Database.PostgreSQL.Simple
-import GHC.Generics
-import Data.Aeson (FromJSON, ToJSON)
 import Control.Monad.IO.Class (liftIO)
+import Data.Text.Encoding (encodeUtf8)
+
+main :: IO ()
+main = do
+  env <- loadEnv
+  conn <- connectPostgreSQL ((encodeUtf8 . databaseConnectionString) env)
+  scotty 3000 $ server conn
 
 server :: Connection -> ScottyM ()
 server conn = do
+  middleware logStdoutDev
   get "/funds" $ do
     funds <- liftIO (query_ conn "select id, amount, name from funds" :: IO [Fund])
     json funds
@@ -27,8 +35,3 @@ insertFund :: Connection -> Fund -> IO Fund
 insertFund conn fund = do
   [Only id] <- query conn insertQuery fund
   return fund { fundId = id }
-
-main :: IO ()
-main = do
-  conn <- connectPostgreSQL ("host='127.0.0.1' user='db' dbname='db' password='db' port='5598'")
-  scotty 3000 $ server conn

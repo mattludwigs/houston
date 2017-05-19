@@ -18,7 +18,9 @@ library
   default-language:    Haskell2010
   ghc-options:         -Wall
   hs-source-dirs:      src
-  exposed-modules:     Data.Fund
+  exposed-modules:     Fund
+                     , Data.Fund
+                     , Data.Environment
   build-depends:       base >= 4.7 && < 5
                      , postgresql-simple
                      , aeson
