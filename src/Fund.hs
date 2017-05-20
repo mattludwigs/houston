@@ -7,6 +7,6 @@ import Data.Text (pack)
 
 loadEnv :: IO Environment
 loadEnv = do
-  port <- getEnv "PORT"
+  envPort <- getEnv "PORT"
   dbConnectionStr <- getEnv "DATABASE_URL"
-  return (Environment (pack port) (pack dbConnectionStr))
+  return (Environment (pack envPort) (pack dbConnectionStr))

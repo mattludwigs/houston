@@ -1,10 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE DeriveGeneric #-}
 module Main where
 
 import Fund (loadEnv)
 import Data.Fund (Fund (..))
-import Data.Environment (databaseConnectionString)
+import Data.Environment (databaseConnectionString, parsePort)
 import Web.Scotty
 import Network.Wai.Middleware.RequestLogger
 import Database.PostgreSQL.Simple
@@ -15,7 +14,7 @@ main :: IO ()
 main = do
   env <- loadEnv
   conn <- connectPostgreSQL ((encodeUtf8 . databaseConnectionString) env)
-  scotty 3000 $ server conn
+  scotty (parsePort env) $ server conn
 
 server :: Connection -> ScottyM ()
 server conn = do
@@ -35,3 +34,4 @@ insertFund :: Connection -> Fund -> IO Fund
 insertFund conn fund = do
   [Only id] <- query conn insertQuery fund
   return fund { fundId = id }
+
